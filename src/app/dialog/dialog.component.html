@@ -1,0 +1,7 @@
+<div *ngIf="dialogService.isDialogActive">
+  <div class="dialog-backdrop" (click)="onClose()"></div>
+  <div class="dialog-content">
+    <ng-template appDialogContainer></ng-template>
+    <button (click)="onClose()">Close</button>
+  </div>
+</div>
