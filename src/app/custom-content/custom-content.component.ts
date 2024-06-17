@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { DialogService } from '../dialog.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,7 +10,12 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule]
 })
 export class CustomContentComponent {
+  constructor(private dialogService: DialogService) {}
   @Input() data: any;
   @Input() width!: string;
   @Input() visibleButtonClose: boolean = true;
+
+  submitValue() {
+    this.dialogService.closeDialog('Submitted Value Hello World!');
+  }
 }

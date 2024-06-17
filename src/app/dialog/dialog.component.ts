@@ -14,6 +14,7 @@ export class DialogComponent implements OnInit, AfterViewInit {
   @Output() onClose = new EventEmitter<void>();
   @Input() config: any;
   @Input() visibleButtonClose: boolean = true;
+  @Input() width: string = '450px';
 
   viewContainerRef!: ViewContainerRef;
 
@@ -23,13 +24,13 @@ export class DialogComponent implements OnInit, AfterViewInit {
     if (this.dialogContainer) {
       this.viewContainerRef = this.dialogContainer.viewContainerRef;
       // console.log('Dialog container view initialized:', this.viewContainerRef);
-      console.log('Dialog config:', this.config);
+      // console.log('Dialog config:', this.config);
     } else {
       console.error('Dialog container is not available');
     }
   }
 
-  closeDialog() {
-    this.onClose.emit();
+  closeDialog(result: any = null) {
+    this.onClose.emit(result);
   }
 }

@@ -3,10 +3,11 @@ import {
   ComponentRef,
   Type,
   ApplicationRef,
+  Injector,
   createComponent,
   EnvironmentInjector,
 } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { DialogComponent } from './dialog/dialog.component';
 
 @Injectable({
@@ -17,19 +18,21 @@ export class DialogService {
   private activeDialogComponentRef: ComponentRef<DialogComponent> | null = null;
   private activeContentComponentRef: ComponentRef<any> | null = null;
   public isDialogActive = false;
+  private dialogResultSubject = new Subject<any>();
 
   constructor(
     private appRef: ApplicationRef,
+    private injector: Injector,
     private environmentInjector: EnvironmentInjector
   ) {
-    this.dialogCloseSubject.subscribe(() => {
-      this.closeDialog();
+    this.dialogCloseSubject.subscribe((result) => {
+      this.closeDialog(result);
     });
   }
 
-  openDialog<T>(component: Type<T>, config?: Partial<T>):DialogComponent {
+  openDialog<T>(component: Type<T>, config?: Partial<T>): Observable<any> {
     if (this.isDialogActive) {
-      this.closeDialog();
+      this.closeDialog(null);
     }
 
     const dialogComponentRef = this.createDialogComponent();
@@ -37,6 +40,7 @@ export class DialogService {
     if (!dialogComponentRef) {
       throw new Error('Dialog component creation failed.');
     }
+
     this.activeDialogComponentRef = dialogComponentRef;
     this.activeDialogComponentRef.instance.config = config;
     this.isDialogActive = true;
@@ -64,10 +68,9 @@ export class DialogService {
       this.activeContentComponentRef = componentRef;
 
       // console.log('Dialog opened with component:', component, 'and config:', config);
-      console.log('Dialog component config:', config);
     });
-    // console.log('this.activeContentComponentRef?.instance', this.activeDialogComponentRef?.instance);
-    return this.activeDialogComponentRef?.instance;
+
+    return this.dialogResultSubject.asObservable();
   }
 
   private createDialogComponent(): ComponentRef<DialogComponent> | null {
@@ -80,13 +83,19 @@ export class DialogService {
     const domElem = (componentRef.hostView as any).rootNodes[0] as HTMLElement;
     document.body.appendChild(domElem);
 
-    componentRef.instance.onClose.subscribe(() => this.closeDialog());
+    componentRef.instance.onClose.subscribe(result => {
+      this.dialogResultSubject.next(result);
+      this.dialogResultSubject.complete();
+      // this.dialogCloseSubject.next(result);
+      // this.dialogCloseSubject.complete();
+      this.closeDialog(result);
+    });
 
     return componentRef;
   }
 
-  closeDialog() {
-    console.log('Closing dialog');
+  closeDialog(result?: any) {
+    console.log('service.closeDialog: ', result);
 
     if (this.activeContentComponentRef) {
       this.activeContentComponentRef.destroy();
@@ -100,9 +109,12 @@ export class DialogService {
     }
 
     this.isDialogActive = false;
+
+    this.dialogResultSubject.next(result);
+    this.dialogResultSubject.complete();
   }
 
-  close() {
-    this.dialogCloseSubject.next();
-  }
+  // close() {
+  //   this.dialogCloseSubject.next();
+  // }
 }
