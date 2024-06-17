@@ -1,53 +1,107 @@
-import { Injectable, ComponentRef, Type, ViewContainerRef } from '@angular/core';
+import {
+  Injectable,
+  ComponentRef,
+  Type,
+  ApplicationRef,
+  Injector,
+  createComponent,
+  EnvironmentInjector,
+} from '@angular/core';
 import { Subject } from 'rxjs';
+import { DialogComponent } from './dialog/dialog.component';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DialogService {
   private dialogCloseSubject = new Subject<void>();
-  private dialogContainerRef: ViewContainerRef | null = null;
-  private activeComponentRef: ComponentRef<any> | null = null;
+  private activeDialogComponentRef: ComponentRef<DialogComponent> | null = null;
+  private activeContentComponentRef: ComponentRef<any> | null = null;
   public isDialogActive = false;
 
-  constructor() {
+  constructor(
+    private appRef: ApplicationRef,
+    private injector: Injector,
+    private environmentInjector: EnvironmentInjector
+  ) {
     this.dialogCloseSubject.subscribe(() => {
-      if (this.activeComponentRef) {
-        this.closeDialog(this.activeComponentRef);
-      }
+      this.closeDialog();
     });
   }
 
-  setViewContainerRef(vcr: ViewContainerRef) {
-    console.log('ViewContainerRef set');
-    this.dialogContainerRef = vcr;
-  }
-
   openDialog<T>(component: Type<T>, config?: Partial<T>): void {
-    if (!this.dialogContainerRef) {
-      throw new Error('Dialog container ViewContainerRef is not set.');
+    if (this.isDialogActive) {
+      this.closeDialog();
     }
 
-    const componentRef: ComponentRef<T> = this.dialogContainerRef.createComponent(component);
-    this.activeComponentRef = componentRef;
+    const dialogComponentRef = this.createDialogComponent();
+
+    if (!dialogComponentRef) {
+      throw new Error('Dialog component creation failed.');
+    }
+
+    this.activeDialogComponentRef = dialogComponentRef;
     this.isDialogActive = true;
 
-    if (config) {
-      Object.assign(componentRef.instance as any, config);
-    }
+    // Wait for the view to be initialized
+    setTimeout(() => {
+      const viewContainerRef = dialogComponentRef.instance.viewContainerRef;
 
-    console.log('Dialog opened with component:', component, 'and config:', config);
+      if (!viewContainerRef) {
+        console.error('viewContainerRef is not available');
+        return;
+      }
+
+      const componentRef = createComponent(component, {
+        environmentInjector: this.environmentInjector,
+        projectableNodes: [[]]
+      });
+
+      viewContainerRef.insert(componentRef.hostView);
+
+      if (config) {
+        Object.assign(componentRef.instance as any, config);
+      }
+
+      this.activeContentComponentRef = componentRef;
+
+      console.log('Dialog opened with component:', component, 'and config:', config);
+    });
   }
 
-  closeDialog<T>(componentRef: ComponentRef<T>): void {
+  private createDialogComponent(): ComponentRef<DialogComponent> | null {
+    const componentRef = createComponent(DialogComponent, {
+      environmentInjector: this.environmentInjector,
+    });
+
+    this.appRef.attachView(componentRef.hostView);
+
+    const domElem = (componentRef.hostView as any).rootNodes[0] as HTMLElement;
+    document.body.appendChild(domElem);
+
+    componentRef.instance.onClose.subscribe(() => this.closeDialog());
+
+    return componentRef;
+  }
+
+  closeDialog() {
     console.log('Closing dialog');
-    componentRef.destroy();
-    this.activeComponentRef = null;
+
+    if (this.activeContentComponentRef) {
+      this.activeContentComponentRef.destroy();
+      this.activeContentComponentRef = null;
+    }
+
+    if (this.activeDialogComponentRef) {
+      this.appRef.detachView(this.activeDialogComponentRef.hostView);
+      this.activeDialogComponentRef.destroy();
+      this.activeDialogComponentRef = null;
+    }
+
     this.isDialogActive = false;
   }
 
   close() {
-    console.log('Emitting close event');
     this.dialogCloseSubject.next();
   }
 }

@@ -2,10 +2,10 @@ import { Directive, ViewContainerRef } from '@angular/core';
 
 @Directive({
   selector: '[appDialogContainer]',
-  standalone: true,
+  standalone: true
 })
 export class DialogContainerDirective {
   constructor(public viewContainerRef: ViewContainerRef) {
-    console.log('DialogContainerDirective initializedXXXXXXXXXXXXXXXX');
+    console.log('DialogContainerDirective initialized');
   }
 }

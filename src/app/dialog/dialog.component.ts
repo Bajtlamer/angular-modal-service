@@ -1,5 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { DialogService } from '../dialog.service';
+import { Component, EventEmitter, OnInit, ViewChild, Output, ViewContainerRef, AfterViewInit } from '@angular/core';
 import { DialogContainerDirective } from '../dialog-container.directive';
 import { CommonModule } from '@angular/common';
 
@@ -12,22 +11,22 @@ import { CommonModule } from '@angular/common';
 })
 export class DialogComponent implements OnInit, AfterViewInit {
   @ViewChild(DialogContainerDirective, { static: true }) dialogContainer!: DialogContainerDirective;
+  @Output() onClose = new EventEmitter<void>();
 
-  constructor(public dialogService: DialogService) { }
+  viewContainerRef!: ViewContainerRef;
 
   ngOnInit(): void {}
 
   ngAfterViewInit() {
     if (this.dialogContainer) {
+      this.viewContainerRef = this.dialogContainer.viewContainerRef;
       console.log('Dialog container view initialized:', this.dialogContainer);
-      this.dialogService.setViewContainerRef(this.dialogContainer.viewContainerRef);
     } else {
       console.error('Dialog container is not available');
     }
   }
 
-  onClose() {
-    console.log('Dialog close triggered');
-    this.dialogService.close();
+  closeDialog() {
+    this.onClose.emit();
   }
 }
