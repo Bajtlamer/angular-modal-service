@@ -1,4 +1,4 @@
-<div *ngIf="dialogService.isDialogActive">
+<div [hidden]="!dialogService.isDialogActive">
   <div class="dialog-backdrop" (click)="onClose()"></div>
   <div class="dialog-content">
     <ng-template appDialogContainer></ng-template>
