@@ -1,5 +1,5 @@
 <div class="dialog-backdrop" (click)="closeDialog()"></div>
 <div class="dialog-content">
   <ng-template appDialogContainer></ng-template>
-  <button (click)="closeDialog()">Close</button>
+  <button *ngIf="config.visibleButtonClose" (click)="closeDialog()">Close</button>
 </div>

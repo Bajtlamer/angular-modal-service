@@ -3,11 +3,10 @@ import {
   ComponentRef,
   Type,
   ApplicationRef,
-  Injector,
   createComponent,
   EnvironmentInjector,
 } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { DialogComponent } from './dialog/dialog.component';
 
 @Injectable({
@@ -21,7 +20,6 @@ export class DialogService {
 
   constructor(
     private appRef: ApplicationRef,
-    private injector: Injector,
     private environmentInjector: EnvironmentInjector
   ) {
     this.dialogCloseSubject.subscribe(() => {
@@ -29,7 +27,7 @@ export class DialogService {
     });
   }
 
-  openDialog<T>(component: Type<T>, config?: Partial<T>): void {
+  openDialog<T>(component: Type<T>, config?: Partial<T>):DialogComponent {
     if (this.isDialogActive) {
       this.closeDialog();
     }
@@ -39,8 +37,8 @@ export class DialogService {
     if (!dialogComponentRef) {
       throw new Error('Dialog component creation failed.');
     }
-
     this.activeDialogComponentRef = dialogComponentRef;
+    this.activeDialogComponentRef.instance.config = config;
     this.isDialogActive = true;
 
     // Wait for the view to be initialized
@@ -65,8 +63,11 @@ export class DialogService {
 
       this.activeContentComponentRef = componentRef;
 
-      console.log('Dialog opened with component:', component, 'and config:', config);
+      // console.log('Dialog opened with component:', component, 'and config:', config);
+      console.log('Dialog component config:', config);
     });
+    // console.log('this.activeContentComponentRef?.instance', this.activeDialogComponentRef?.instance);
+    return this.activeDialogComponentRef?.instance;
   }
 
   private createDialogComponent(): ComponentRef<DialogComponent> | null {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, ViewChild, Output, ViewContainerRef, AfterViewInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, ViewChild, Output, ViewContainerRef, AfterViewInit, Input } from '@angular/core';
 import { DialogContainerDirective } from '../dialog-container.directive';
 import { CommonModule } from '@angular/common';
 
@@ -12,6 +12,8 @@ import { CommonModule } from '@angular/common';
 export class DialogComponent implements OnInit, AfterViewInit {
   @ViewChild(DialogContainerDirective, { static: true }) dialogContainer!: DialogContainerDirective;
   @Output() onClose = new EventEmitter<void>();
+  @Input() config: any;
+  @Input() visibleButtonClose: boolean = true;
 
   viewContainerRef!: ViewContainerRef;
 
@@ -20,7 +22,8 @@ export class DialogComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     if (this.dialogContainer) {
       this.viewContainerRef = this.dialogContainer.viewContainerRef;
-      console.log('Dialog container view initialized:', this.dialogContainer);
+      // console.log('Dialog container view initialized:', this.viewContainerRef);
+      console.log('Dialog config:', this.config);
     } else {
       console.error('Dialog container is not available');
     }

@@ -9,5 +9,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule]
 })
 export class CustomContentComponent {
-  @Input() someConfig: string = '';
+  @Input() data: any;
+  @Input() width!: string;
+  @Input() visibleButtonClose: boolean = true;
 }

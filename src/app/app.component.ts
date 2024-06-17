@@ -20,6 +20,37 @@ export class AppComponent implements AfterViewInit {
 
   openDialog() {
     console.log('Opening dialog with custom content');
-    this.dialogService.openDialog(CustomContentComponent, { someConfig: 'value' });
+
+    const dialogRef = this.dialogService.openDialog(CustomContentComponent, {
+      data: {
+        modalDialogBoxProperties: {
+          title: 'Confirmation',
+          description: 'Delete department',
+          message:
+            'You are about to permanently delete the ' +
+            ' department. Do you want to continue?',
+          buttons: [
+            {
+              name: 'Yes',
+              action: (response: boolean): void => {
+                return dialogRef.closeDialog();
+              },
+              value: true,
+            },
+            {
+              name: 'No',
+              action: (response: boolean): void => {
+                return this.dialogService.closeDialog();
+              },
+              value: false,
+            },
+          ],
+        },
+      },
+      visibleButtonClose: true,
+      // height: '1050px',
+      width: '450px',
+    });
+    console.log('Dialog ref:', dialogRef);
   }
 }
