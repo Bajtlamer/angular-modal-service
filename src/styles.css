@@ -1,1 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    h1 {
+      @apply text-3xl font-bold py-2;
+    }
+    h2 {
+      @apply text-2xl font-bold py-2;
+    }
+    p {
+      @apply py-2;
+    }
+  }

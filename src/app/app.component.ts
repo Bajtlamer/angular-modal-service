@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent implements AfterViewInit {
 
-  constructor(private dialogService: DialogService) {}
+  constructor(private dialog: DialogService) {}
 
   ngAfterViewInit() {
     console.log('App component view initialized');
@@ -20,7 +20,7 @@ export class AppComponent implements AfterViewInit {
 
   openDialog() {
     console.log('Opening dialog with custom content');
-    this.dialogService.openDialog(CustomContentComponent, { data: 'value', width: '500px', visibleButtonClose: true})
+    this.dialog.open(CustomContentComponent, { data: 'value', width: '500px', visibleButtonClose: true})
       .subscribe(result => {
         console.log('CLOSE APP result:', result);
       });

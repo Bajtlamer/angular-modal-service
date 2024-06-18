@@ -30,7 +30,7 @@ export class DialogService {
     });
   }
 
-  openDialog<T>(component: Type<T>, config?: Partial<T>): Observable<any> {
+  open<T>(component: Type<T>, config?: Partial<T>): Observable<any> {
     if (this.isDialogActive) {
       this.closeDialog(null);
     }
